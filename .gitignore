@@ -1,0 +1,7 @@
+# Istio release tarball (only needed by the old istioctl install; we use Helm now)
+CICD/istio-*/
+istio-*/
+
+# local env / secrets
+*.env
+.env
