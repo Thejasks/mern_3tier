@@ -1,0 +1,31 @@
+replicaCount: 2
+
+image:
+  repository: harshajain/frontend     # private Docker Hub repo
+  tag: "1"
+  pullPolicy: IfNotPresent
+
+# Pull secret is CREATED by this chart from the credentials below.
+# Fill username/password (a Docker Hub access token is recommended over a password).
+imagePullSecret:
+  name: dockerhub-creds
+  registry: https://index.docker.io/v1/
+  username: REPLACE_ME
+  password: REPLACE_ME
+  email: itdefined.org@gmail.com
+
+service:
+  type: NodePort        # NodePort so an AWS ALB (instance mode) can target it
+  port: 80
+  targetPort: 3000
+
+# Injected into the SPA at runtime (window._env_.BACKEND_URL)
+backendUrl: "http://backend.dev.hobbyez.com"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi

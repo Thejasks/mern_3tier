@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: backend
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      # ECR pull secret — created separately with kubectl (see README):
+      #   kubectl create secret docker-registry ecr-creds -n backend ...
+      imagePullSecrets:
+        - name: ecr-creds
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000        # numeric UID — required so kubelet can verify non-root
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: backend
+          image: 637423622313.dkr.ecr.ap-south-1.amazonaws.com/mern-backend:1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: MONGO_HOST
+              value: "mongo-service.database.svc.cluster.local"
+            - name: MONGO_PORT
+              value: "27017"
+            - name: CORS_ORIGIN
+              value: "http://app.hobbyez.com"
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: mongo-user
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: mongo-password
+            - name: MONGO_AUTH_SOURCE
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: mongo-auth-db
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: jwt-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: tmp                 # writable scratch (root fs is read-only)
+          emptyDir: {}

@@ -1,0 +1,30 @@
+replicaCount: 2
+
+image:
+  repository: 637423622313.dkr.ecr.ap-south-1.amazonaws.com/mern-backend
+  tag: "1"
+  pullPolicy: IfNotPresent
+
+# ECR pull secret — created out-of-band (token rotates ~12h); see prerequisites/ecr-setup.sh
+imagePullSecret: ecr-creds
+
+mongo:
+  host: mongo-service.database.svc.cluster.local
+  port: 27017
+
+corsOrigin: "http://app.hobbyez.com"
+
+# backend-secret is created by this chart
+secret:
+  jwtSecret: super_secret_key
+  mongoUser: admin
+  mongoPassword: password
+  mongoAuthDb: admin
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi

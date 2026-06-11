@@ -1,0 +1,231 @@
+/* Copyright 2024 itdefined.org
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
+
+/* Base Styles */
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 440px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Health Check */
+.health-check {
+  text-align: center;
+  padding: 2rem;
+}
+
+.health-check h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.health-check p {
+  color: #7f8c8d;
+  margin: 0.5rem 0;
+}
+
+/* Error Panel */
+.error-panel {
+  text-align: center;
+  padding: 2rem;
+  background: #ffe6e6;
+  border-radius: 8px;
+  border: 1px solid #ff6666;
+}
+
+.error-panel h2 {
+  color: #e74c3c;
+  margin-bottom: 1rem;
+}
+
+.error-panel p {
+  color: #c0392b;
+  margin: 0.5rem 0;
+}
+
+.error-panel code {
+  display: block;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: #fff;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.retry-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retry-btn:hover {
+  background: #c0392b;
+}
+
+/* Auth Box */
+.auth-box {
+  padding: 1rem;
+}
+
+.auth-box h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+input {
+  width: 100%;
+  padding: 12px 16px;
+  margin: 8px 0;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 1rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background: #2980b9;
+}
+
+button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Alerts */
+.alert {
+  padding: 12px;
+  border-radius: 8px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.error {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.success {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #86efac;
+}
+
+/* Toggle Link */
+.toggle {
+  color: #3498db;
+  text-align: center;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.toggle:hover {
+  color: #2980b9;
+}
+
+/* Dashboard */
+.dashboard .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.logout-btn {
+  background: #e74c3c;
+  padding: 8px 16px;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+}
+
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-list li {
+  padding: 14px;
+  margin: 8px 0;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-list li small {
+  color: #7f8c8d;
+  font-size: 0.85em;
+}
+
+.empty {
+  justify-content: center;
+  background: transparent;
+  color: #7f8c8d;
+}

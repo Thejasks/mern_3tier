@@ -1,0 +1,23 @@
+image:
+  repository: mongo
+  tag: "6.0.14"
+  pullPolicy: IfNotPresent
+
+storage:
+  create: true          # set false if the StorageClass already exists
+  className: ebs-mongo
+  size: 4Gi
+
+# mongo-secret created by this chart
+secret:
+  rootUsername: admin
+  rootPassword: password
+  authDb: admin
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

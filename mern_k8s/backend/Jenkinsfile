@@ -1,0 +1,116 @@
+// ============================================================================
+// Backend CI pipeline  (lives WITH the code it builds — pipeline-as-code)
+//
+// Flow:  checkout -> install/test -> SonarQube -> docker build -> Trivy
+//        -> push immutable image -> bump tag in the GitOps repo (mern_cicd)
+//
+// It does NOT deploy. Pushing a new image tag into the GitOps repo is the
+// hand-off; Argo CD watches mern_cicd and reconciles the cluster.
+// ============================================================================
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION      = "ap-south-1"
+        REGISTRY        = "637423622313.dkr.ecr.ap-south-1.amazonaws.com"
+        IMAGE           = "637423622313.dkr.ecr.ap-south-1.amazonaws.com/mern-backend"
+        IMAGE_TAG       = "${env.BUILD_NUMBER}"
+
+        // GitOps repo + the env values file this pipeline auto-promotes (dev only).
+        // Prod is promoted by a human PR — never auto-bumped from CI.
+        GITOPS_REPO     = "github.com/devopscalendar101/mern_cicd.git"
+        GITOPS_BRANCH   = "main"
+        GITOPS_VALUES   = "environments/dev/backend.yaml"
+
+        SONAR_HOST_URL  = "http://65.0.129.172:9000"
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install & Test') {
+            steps {
+                sh '''
+                    npm install
+                    npm test --if-present
+                '''
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-backend', variable: 'SONAR_TOKEN')]) {
+                    sh "sonar-scanner -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_TOKEN}"
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                script {
+                    image = docker.build("${IMAGE}:${IMAGE_TAG}", "--no-cache .")
+                }
+            }
+        }
+
+        stage('Trivy Scan') {
+            steps {
+                // Report everything; only FAIL the build on CRITICAL vulns.
+                sh "trivy image --severity LOW,MEDIUM,HIGH --exit-code 0 --format table ${IMAGE}:${IMAGE_TAG}"
+                sh "trivy image --severity CRITICAL --exit-code 1 --format table ${IMAGE}:${IMAGE_TAG}"
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                // ECR login (Jenkins agent uses the node/instance IAM role or configured AWS creds)
+                sh '''
+                    aws ecr get-login-password --region ${AWS_REGION} \
+                      | docker login --username AWS --password-stdin ${REGISTRY}
+                    docker push ${IMAGE}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('Promote to dev (GitOps)') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github',
+                                 usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                    sh '''
+                        set -e
+                        rm -rf gitops && git clone https://${GIT_USER}:${GIT_TOKEN}@${GITOPS_REPO} gitops
+                        cd gitops
+                        git checkout ${GITOPS_BRANCH}
+
+                        # Pin the freshly-built, immutable tag in the dev environment values
+                        TAG=${IMAGE_TAG} yq -i '.image.tag = strenv(TAG)' ${GITOPS_VALUES}
+
+                        git config user.email "ci@devopscalendar101"
+                        git config user.name  "jenkins-ci"
+                        git add ${GITOPS_VALUES}
+                        git commit -m "ci(backend): deploy ${IMAGE}:${IMAGE_TAG} to dev" || echo "no change"
+                        git push origin ${GITOPS_BRANCH}
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "docker rmi ${IMAGE}:${IMAGE_TAG} || true"
+            cleanWs()
+        }
+    }
+}

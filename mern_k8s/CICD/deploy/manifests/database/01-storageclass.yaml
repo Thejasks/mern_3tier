@@ -1,0 +1,14 @@
+# EBS-backed StorageClass for Mongo's PVC. Cluster-scoped (no namespace).
+# Skip this file and set storageClassName below to an existing class (e.g. ebs-sc)
+# if your cluster already has one.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-mongo
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  fsType: ext4
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete

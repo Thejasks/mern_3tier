@@ -1,0 +1,13 @@
+# Headless-capable ClusterIP service. Backends reach Mongo at:
+#   mongo-service.database.svc.cluster.local:27017
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+  namespace: database
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017

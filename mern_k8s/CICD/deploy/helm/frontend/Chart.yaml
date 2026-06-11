@@ -1,0 +1,6 @@
+apiVersion: v2
+name: frontend
+description: MERN frontend (React SPA on nginx) — Docker Hub private image + Helm-managed pull secret
+type: application
+version: 0.1.0
+appVersion: "1.0"

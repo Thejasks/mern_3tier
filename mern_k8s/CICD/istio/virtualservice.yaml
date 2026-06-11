@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: frontend
+  namespace: default
+spec:
+  hosts:
+    - "istio.hobbyez.com"
+  gateways:
+    - "mern-istio-gateway"
+  http:
+    - route:
+        - destination:
+            host: frontend.frontend.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: backend
+  namespace: default
+spec:
+  hosts:
+    - "api-istio.hobbyez.com"
+  gateways:
+    - "mern-istio-gateway"
+  http:
+    - route:
+        - destination:
+            host: backend.backend.svc.cluster.local
+            port:
+              number: 3000
